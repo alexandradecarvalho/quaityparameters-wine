@@ -2,7 +2,11 @@ library(NbClust)
 
 # 1 - PCA
 input_matrix = read.table('C:/Users/Alexa/OneDrive - Universidade de Aveiro/Desktop/Mestrado/EM/Assignment2/quaityparameters-wine/pca-data.txt',header=TRUE)
-plot(input_matrix[,-1])
+plot(input_matrix[,-1],col=c("red","blue","green","yellow")[input_matrix[,1]])
+
+barplot(table(input_matrix[1]), main = "Geographical origin of the studied red wines",xlab="Country",ylab="Frequency",ylim=c(0,20), names.arg = c("Argentina", "Chile", "Australia", "South Africa"))
+
+
 
 pearsons_cor_matrix = cor(input_matrix, method = c("pearson"))
 
@@ -33,3 +37,7 @@ for (pc in seq(1, n, by=1)){
   print((new_dataset[,pc]/sqrt(var(input_matrix[,1]))) * sqrt(var(new_dataset[,pc])))
 }
 print(sum)
+
+
+
+
