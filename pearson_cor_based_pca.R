@@ -1,28 +1,22 @@
 library(NbClust)
 
-# 1 - building the input matrix
-input_matrix = read.table('C:/Users/Alexa/OneDrive - Universidade de Aveiro/Desktop/Mestrado/EM/Assignment2/QualityParameterDados.txt',header=TRUE)
+# 1 - PCA
+input_matrix = read.table('C:/Users/Alexa/OneDrive - Universidade de Aveiro/Desktop/Mestrado/EM/Assignment2/quaityparameters-wine/pca-data.txt',header=TRUE)
 plot(input_matrix[,-1])
 
-# 2 - Pearson correlation = cov/sqrt(Var(a)*Var(b))
 pearsons_cor_matrix = cor(input_matrix, method = c("pearson"))
 
-# 3 - Calculate the correlation matrix's eigenvectors and eigenvalues (Eigenvalues = % variance captured)
 ev = eigen(pearsons_cor_matrix)
-
 eigen_vectors = ev$vectors
 eigen_values = ev$values
 
-print(eigen_values)
+print(eigen_vectors)
 
-# 4 - Select the most important PCs: the number of PCs is at least 70% of cumulative percentage of total variation 
 total_variance = sum(eigen_values)
 threshold = total_variance*0.7
 
-pcs =  prcomp(input_matrix[-1], scale=TRUE)
-#pcs = prcomp(input_matrix)
+pcs =  prcomp(input_matrix, scale=TRUE)
 
-# calculate the sum of the eigenvalues until it is more than the threshold          
 n = 0
 for (element in 1:length(eigen_values)){
   if (sum(eigen_values[1:element]) >= threshold){
@@ -31,8 +25,11 @@ for (element in 1:length(eigen_values)){
   }
 }
 
-# 5 - Derive the new data set
 new_dataset = pcs$x
 print(new_dataset[,1:n])
 
-plot()
+sum = 0
+for (pc in seq(1, n, by=1)){
+  print((new_dataset[,pc]/sqrt(var(input_matrix[,1]))) * sqrt(var(new_dataset[,pc])))
+}
+print(sum)
