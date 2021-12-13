@@ -11,7 +11,7 @@ library(dplyr)
 
 
 # Loading dataset
-df <- read.delim('C:/Users/nunop/OneDrive/Ambiente de Trabalho/C. Dados/Semestre 1/EM/Análise exploratória multivariada trabalho/QualityParameterDados.txt')
+df <- read.delim('C:/Users/Alexa/OneDrive - Universidade de Aveiro/Desktop/Mestrado/EM/Assignment2/quaityparameters-wine/QualityParameterDados.txt')[-1]
 
 
 # Apply PCA using prcomp function
