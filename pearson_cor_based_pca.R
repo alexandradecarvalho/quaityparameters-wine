@@ -40,22 +40,18 @@ pearsons_pca = function(input_matrix,n){
 }
 
 
-loading_analysis = function(input_matrix, pcs,n){
-  loadings = pcs$rotation
-  loadings = loadings[nrow(loadings),1:n]
+loading_analysis = function(input_matrix, pcs, n){
+  #take the first five elements of the Last row of the loadings of the PCA
+  loadings = pcs$rotation[15,][1:n]
+  #calculate the country standard deviation
+  country_SD = sqrt(diag(cov(input_matrix))[15])
+  #calculate the standard deviation of the principal
+  #components of interest
+  pcs_SD = pcs$sdev[1:n]
+  #calculate the correlation of Pearson
+  cors = (loadings * pcs_SD) / country_SD
   
-  country_variance = diag(cov(input_matrix))
-  country_variance = country_variance[length(country_variance)]
-  
-  var_pcs = diag(cov(pcs$x[,1:n]))
-  
-  results = vector("list",n)
-  for(pc in 1:n){
-    value = (loadings[pc]/country_variance) * var_pcs[pc]
-    results[[pc]] = value
-  }
-  
-  return(var_pcs)
+  return(cors)
 }
 
 
@@ -73,9 +69,12 @@ clustering = function(my_pca){
 }
 
 
+#consider all NUMERICAL data
+# use a relative import . represent the directory that comes from
+# the getwd() command
+wine_data = read.table('./QualityParameterDados.txt',header=TRUE)[-1]
 
-wine_data = read.table('C:/Users/Alexa/OneDrive - Universidade de Aveiro/Desktop/Mestrado/EM/Assignment2/quaityparameters-wine/QualityParameterDados.txt',header=TRUE)[-1]
-
+#apply PCA
 pcs = get_pcs(wine_data)
 print(summary(pcs))
 
