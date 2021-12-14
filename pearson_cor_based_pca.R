@@ -1,29 +1,38 @@
 library(NbClust)
+library(factoextra)
+library(dplyr)
+
+
+
+get_pcs = function(input_matrix) {
+  return(prcomp(input_matrix, scale=TRUE,center = TRUE))
+}
 
 get_eigen_values = function(input_matrix){
-  pearsons_cor_matrix = cor(input_matrix, method = c("pearson"))
-  eigen_values = eigen(pearsons_cor_matrix)$values
-  
+  pearsons_cov_matrix = cor(input_matrix)
+  eigen_values = eigen(pearsons_cov_matrix)$values
+
   return(eigen_values)
 }
 
-pearsons_pca = function(input_matrix,n=0){
+optimal_n = function(input_matrix){
   eigen_values = get_eigen_values(input_matrix)
   threshold = sum(eigen_values)*0.7
   
-  pcs =  prcomp(input_matrix, scale=TRUE,center = TRUE)
-  
-  if(n == 0){
-    for (element in 1:length(eigen_values)){
-      if (sum(eigen_values[1:element]) >= threshold){
-        n = element
-        break
-      }
+  for (element in 1:length(eigen_values)){
+    if (sum(eigen_values[1:element]) >= threshold){
+      n = element
+      break
     }
   }
+  return(n)
+}
+
+pearsons_pca = function(input_matrix,n){
+  pcs = get_pcs(input_matrix)
 
   new_dataset = pcs$x
-
+  
   print("principal components selected")
   print(new_dataset[,1:n])
   
@@ -31,32 +40,22 @@ pearsons_pca = function(input_matrix,n=0){
 }
 
 
-loading_analysis = function(input_matrix, new_dataset, eigen_values){
-  variances = diag(cov(input_matrix))
+loading_analysis = function(input_matrix, pcs,n){
+  loadings = pcs$rotation
+  loadings = loadings[nrow(loadings),1:n]
   
-  #a data.frame perhaps is better
-  cors_PCS = matrix(ncol=4, nrow=16)
+  country_variance = diag(cov(input_matrix))
+  country_variance = country_variance[length(country_variance)]
   
-  for (pc in 1:ncol(new_dataset)){
-    print(ncol(new_dataset))
-    for (original_var in 1:length(input_matrix) ){
-      
-      print(paste("corr between pc ", pc, " and original var", names(input_matrix[original_var])))
-      
-      loading = new_dataset[original_var, pc]
-      variance_original_var = variances[original_var]
-      eigen_values = get_eigen_values(input_matrix)
-      eigen_value = eigen_values[pc]
-      
-      cor_PCS = (loading/sqrt(variance_original_var)) * sqrt(eigen_value) 
-      
-      cors_PCS[original_var, pc] = (loading/sqrt(variance_original_var)) * sqrt(eigen_value) 
-      print(cors_PCS[original_var, pc])
-    }
+  var_pcs = diag(cov(pcs$x[,1:n]))
+  
+  results = vector("list",n)
+  for(pc in 1:n){
+    value = (loadings[pc]/country_variance) * var_pcs[pc]
+    results[[pc]] = value
   }
   
-  # notice the 11th row
-  return(format(cors_PCS, digits=4, scientific=FALSE))
+  return(var_pcs)
 }
 
 
@@ -76,13 +75,17 @@ clustering = function(my_pca){
 
 
 wine_data = read.table('C:/Users/Alexa/OneDrive - Universidade de Aveiro/Desktop/Mestrado/EM/Assignment2/quaityparameters-wine/QualityParameterDados.txt',header=TRUE)[-1]
-my_pca = pearsons_pca(wine_data)
-summary(my_pca)
+
+pcs = get_pcs(wine_data)
+print(summary(pcs))
+
+n = optimal_n(wine_data)
+principal_components = pearsons_pca(wine_data,n)
 
 bidimentional_pca = pearsons_pca(wine_data,2) 
-biplot(prcomp(wine_data, scale=TRUE,center = TRUE), main = "Biplot", scale = 0)
+#biplot(pcs, main = "Biplot", scale = 0)
 
-variable_impact = loading_analysis(wine_data,my_pca)
+variable_impact = loading_analysis(wine_data,pcs,n)
+print(variable_impact)
 
-clustering(my_pca)
-
+#clustering(principal_components)
