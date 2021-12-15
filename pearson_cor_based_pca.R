@@ -2,8 +2,6 @@ library(NbClust)
 library(factoextra)
 library(dplyr)
 
-
-
 get_pcs = function(input_matrix) {
   return(prcomp(input_matrix, scale=TRUE,center = TRUE))
 }
@@ -40,14 +38,14 @@ pearsons_pca = function(input_matrix,n){
 }
 
 
-loading_analysis = function(input_matrix, pcs, n){
+loading_analysis = function(input_matrix, pca, n){
   #take the first five elements of the Last row of the loadings of the PCA
-  loadings = pcs$rotation[15,][1:n]
+  loadings = pca$rotation[15,][1:n]
   #calculate the country standard deviation
   country_SD = sqrt(diag(cov(input_matrix))[15])
   #calculate the standard deviation of the principal
   #components of interest
-  pcs_SD = pcs$sdev[1:n]
+  pca_SD = pca$sdev[1:n]
   #calculate the correlation of Pearson
   cors = (loadings * pcs_SD) / country_SD
   
@@ -56,7 +54,7 @@ loading_analysis = function(input_matrix, pcs, n){
 
 
 clustering = function(my_pca){
-  pca_transform = as.data.frame(-my_pca)
+  pca_transform = as.data.frame(my_pca)
 
   fviz_nbclust(pca_transform, kmeans, method = 'wss')
 
@@ -87,4 +85,12 @@ bidimentional_pca = pearsons_pca(wine_data,2)
 variable_impact = loading_analysis(wine_data,pcs,n)
 print(variable_impact)
 
-#clustering(principal_components)
+#plot the first TWO PC using pca$x to refer to the PC of the wines, 
+# pca$rotation contains, in the columns, the PC of the variables THE QUALITY
+#   "É possível sugerir uma redução de dimensionalidade dos dados sem grande perda de
+#   informação dos 44 vinhos?"
+plot(pca$x[,1], pca$x[,2],xlab="PC1", ylab="PC2", main="plot of wine components")
+
+
+ClusterPCA = clustering(principal_components)
+ClusterData = clustering(wine_data)

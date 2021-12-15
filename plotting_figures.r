@@ -1,4 +1,4 @@
-input_matrix = read.table('C:/Users/Alexa/OneDrive - Universidade de Aveiro/Desktop/Mestrado/EM/Assignment2/quaityparameters-wine/pca-data.txt',header=TRUE)
+input_matrix = read.table('seconda_prova_16_12/quaityparameters-wine/QualityParameterDados.txt',header=TRUE)
 
 barplot(table(input_matrix[1]), main = "Geographical origin of the studied red wines",xlab="Country",ylab="Frequency",ylim=c(0,20), names.arg = c("Argentina (ARG)", "Chile (CHI)", "Australia (AUS)", "South Africa (SOU)"))
 
@@ -10,3 +10,4 @@ par(mfrow=c(1,ncol(input_matrix)),main="Quantiles per Variable")
 for (n in 1:ncol(input_matrix)){
   boxplot(x=input_matrix[,n],data=input_matrix,xlab=names(input_matrix[,n])) 
 }
+
